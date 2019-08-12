@@ -25,9 +25,24 @@ int DeviceSoc;
 
 PARAM Param;
 
+/*
+ *  ## 受信処理
+ */
 void *MyEthThread(void *arg)
 {
-  int nready;
+  int  nready; // poll()の戻り値. I/Oがレディになったディスクリプタの個数.
+
+  // pollfd構造体 | <poll.h>より
+  // struct pollfd {
+  //   int    fd;       /* 監視fd */
+  //   short  events;   /* 調査するイベント */
+  //   short  revents;  /* 発生したイベント */
+  // };
+  //
+  // pollシステムコールに使われる.
+  // poll(struct pollfd fds[], nfdds_t nfds, int timeout);
+  // poll()はtimeout[ms]までの間にI/Oがレディになったディスクリプタの個数を返す.
+  // 発生したイベントがreventsの各bitにセットされている.
   struct pollfd  targets[1];
   u_int8_t  buf[2048];
   int  len;
@@ -46,6 +61,8 @@ void *MyEthThread(void *arg)
         break;
       default:
         if ( targets[0].revents & (POLLIN | POLLERR) ) {
+          // read()システムコール
+          // read(int fields, void *buf, size_t nbyte);
           if ( (len = read(DeviceSoc, buf, sizeof(buf))) <= 0 ) {
             perror("read");
           } else {
@@ -56,5 +73,200 @@ void *MyEthThread(void *arg)
     }
   }
 
-  return NULL;
+  return(NULL);
+}
+
+/*
+ *  ## コマンドの入力処理を行う
+ */
+void *StdInThread(void *arg) {
+  int  nready;
+  struct pollfd  targets[1];
+  char  buf[2048];
+
+  targets[0].fd = fileno(stdin);
+  targets[0].events = POLLIN | POLLERR;
+
+  while (EndFlag == 0) {
+    switch ( (nready = poll(targets, 1, 1000)) ) {
+      case -1:
+        if (errno != EINTR) {
+          perror("poll");
+        }
+        break;
+      case 0:
+        break;
+      default:
+        if (targets[0].revents & (POLLIN | POLLERR)) {
+          fgets(buf, sizeof(buf), stdin);
+          DoCmd(buf);
+        }
+        break;
+    }
+  }
+
+  return(NULL);
+}
+
+/*
+ *  ## 終了処理を行う
+ */
+void sig_term(int sig) {
+  EndFlag = 1;
+}
+
+int ending() {
+  struct ifreq  if_req;
+
+  printf("ending\n");
+
+  if (DeviceSoc != -1) {
+    strcpy(if_req.ifr_name, Param.device);
+    if (ioctl(DeviceSoc, SIOCGIFFLAGS, &if_req) < 0) {
+      perror("ioctl");
+    }
+
+    if_req.ifr_flags = if_req.ifr_flags & ~IFF_PROMISC;
+    if (ioctl(DeviceSoc, SIOCSIFFLAGS, &if_req) < 0) {
+      perror("ioctl");
+    }
+
+    close(DeviceSoc);
+    DeviceSoc = -1;
+  }
+
+  return(0);
+}
+
+/*
+ *   ## インターフェースの情報を出力する
+ */
+int show_ifreq(char *name) {
+  char  buf1[80];
+  int  soc;
+  struct ifreq  ifreq;
+  struct sockaddr_in  addr;
+
+  if ( (soc = socket(AF_INET, SOCK_DGRAM, 0)) == -1 ) {
+    perror("ioctl:flags");
+    close(soc);
+    return(-1);
+  }
+
+  strcpy(ifreq.ifr_name, name);
+
+  if (ioctl(soc, SIOCGIFFLAGS, &ifreq) == -1) {
+    perror("ioctl:flags");
+    close(soc);
+    return(-1);
+  }
+
+  if (ifreq.ifr_flags & IFF_UP) { printf("UP "); }
+  if (ifreq.ifr_flags & IFF_BROADCAST) { printf("BROADCAST "); }
+  if (ifreq.ifr_flags & IFF_PROMISC) { printf("PROMISC "); }
+  if (ifreq.ifr_flags & IFF_MULTICAST) { printf("MULTICAST "); }
+  if (ifreq.ifr_flags & IFF_LOOPBACK) { printf("LOOPBACK "); }
+  if (ifreq.ifr_flags & IFF_POINTOPOINT) { printf("P2P "); }
+  printf("\n");
+
+  if (ioctl(soc, SIOCGIFMTU, &ifreq) == -1) {
+    perror("ioctl:mtu");
+  } else {
+    printf("mtu=%d\n", ifreq.ifr_mtu);
+  }
+
+  if (ioctl(soc, SIOCGIFADDR, &ifreq) == -1) {
+    perror("ioctl:addr");
+  } else if (ifreq.ifr_addr.sa_family != AF_INET) {
+    printf("not AF_INET\n");
+  } else {
+    memcpy(&addr, &ifreq.ifr_addr, sizeof(struct sockaddr_in));
+    printf("myip=%s\n", inet_ntop(AF_INET, &addr.sin_addr, buf1, sizeof(buf1)));
+    Param.myip = addr.sin_addr;
+  }
+
+  close(soc);
+
+  if (GetMacAddress(name, Param.mymac) == -1) {
+    printf("GetMacAddress:error");
+  } else {
+    // Param.mymacにインターフェースのMACアドレスを格納
+    printf("mymac=%s\n", my_ether_ntoa_r(Param.mymac, buf1));
+  }
+
+  return(0);
+}
+
+/*
+ *  ## main関数の記述
+ */
+int main(int argc, char *argv[]) {
+  char  buf1[80];
+  int  i, paramFlag;
+  pthread_attr_t  attr;
+  pthread_t  thread_id;
+
+  SetDefaultParam();
+
+  paramFlag = 0;
+  for (i = 1; i < argc; i++) {
+    if (ReadParam(argv[1]) == -1) {
+      exit(-1);
+    }
+    paramFlag = 1;
+  }
+  if (paramFlag == 0) {
+    if (ReadParam("./MyEth.ini") == -1) {
+      exit(-1);
+    }
+  }
+
+  printf("IP-TTL=%d\n", Param.IpTTL);
+  printf("MTU=%d\n", Param.MTU);
+
+  srandom(time(NULL));
+
+  IpRecvBufInit();
+
+  if ( (DeviceSoc = init_socket(Param.device)) == -1 ) {
+    exit(-1);
+  }
+
+  printf("device=%s\n", Param.device);
+  printf("++++++++++++++++++++++++++++++\n");
+  show_ifreq(Param.device);
+  printf("++++++++++++++++++++++++++++++\n");
+
+  printf("vmac=%s\n", my_ether_ntoa_r(Param.vmac, buf1));
+  printf("vip=%s\n", inet_ntop(AF_INET, &Param.vip, buf1, sizeof(buf1)));
+  printf("vmask=%s\n", inet_ntop(AF_INET, &Param.vmask, buf1, sizeof(buf1)));
+  printf("gateway=%s\n", inet_ntop(AF_INET, &Param.gateway, buf1, sizeof(buf1)));
+
+  signal(SIGINT, sig_term);
+  signal(SIGTERM, sig_term);
+  signal(SIGQUIT, sig_term);
+  signal(SIGPIPE, SIG_IGN);
+
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, 102400);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+  if (pthread_create(&thread_id, &attr, StdInThread, NULL) != 0) {
+    printf("pthread_create:error\n");
+  }
+  if (pthread_create(&thread_id, &attr, StdInThread, NULL) != 0) {
+    printf("pthread_create:error\n");
+  }
+
+  if (ArpCheckGArp(DeviceSoc) == 0) {
+    printf("GArp check fail\n");
+    return(-1);
+  }
+
+  while (EndFlag == 0) {
+    sleep(1);
+  }
+
+  ending();
+
+  return(0);
 }
