@@ -29,7 +29,7 @@ extern PARAM  Param;
 static char  *ParamFname = NULL;
 
 /*
- *   ## パラメータのデフォルト値をセットしてファイルから読み込む
+ *  ## パラメータのデフォルト値をセットしてファイルから読み込む
  */
 int SetDefaultParam() {
   Param.MTU = DEFAULT_MTU;
@@ -99,7 +99,7 @@ int ReadParam(char *fname) {
 }
 
 /*
- *   ## IPアドレスとサブネットのチェック
+ *  ## IPアドレスとサブネットのチェック
  */
 int isTargetIPAddr(struct in_addr *addr) {
   if (Param.vip.s_addr == addr->s_addr) {
