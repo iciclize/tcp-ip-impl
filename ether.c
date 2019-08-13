@@ -171,7 +171,7 @@ int EtherRecv(int soc, u_int8_t *in_ptr, int in_len) {
   }
 
   if (ntohs(eh->ether_type) == ETHERTYPE_ARP) {
-    ArpRecv(soc, eh, ptr, len); 
+    ArpRecv(soc, eh, ptr, len);
   } else if (ntohs(eh->ether_type) == ETHERTYPE_IP) {
     IpRecv(soc, in_ptr, in_len, eh, ptr, len);
   }
