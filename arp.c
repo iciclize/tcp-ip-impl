@@ -1,3 +1,7 @@
+/*
+ * arp.c
+ * 欠陥があるらしいね
+ */
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -254,3 +258,153 @@ int ArpShowTable() {
  */
 int GetTargetMac(int soc, struct in_addr *daddr, u_int8_t dmac[6], int gratuitous) {
   int  count;
+  struct in_addr  addr;
+
+  if (isSameSubnet(daddr)) {
+    add.s_addr = daddr->s_addr;
+  } else {
+    addr.s_addr = Param.gateway.s_addr;
+  }
+
+  count = 0;
+  while (!ArpSearchTable(&addr, dmac)) {
+    if (gratuitous) {
+      ArpSendRequestGratuitous(soc, &addr);
+    } else {
+      ArpSendRequest(soc, &addr);
+    }
+    DummyWait(DUMMY_WAIT_MS * (count + 1));
+    count++;
+    if (count > RETRY_COUNT) {
+      return(0);
+    }
+  }
+
+  return(1);
+}
+
+/*
+ *  ## イーサネットにARPパケットを送信する
+ */
+int ArpSend(int soc, u_int16_t op,
+    u_int8_t e_smac[6], u_int8_t e_dmac[6],
+    u_int8_t smac[6], u_int8_t dmac[6],
+    u_int8_t saddr[4], u_int8_t daddr[4]) {
+  struct ether_arp  arp;
+
+  memset(&arp, 0, sizeof(struct ether_arp));
+  arp.arp_hrd = htons(ARPHRD_ETHER);
+  arp.arp_pro = htons(ETHERTYPE_IP);
+  arp.arp_hln = 6;
+  arp.arp_pln = 4;
+  arp.arp_op = htons(op);
+
+  memcpy(arp.arp_sha, smac, 6);
+  memcpy(arp.arp_tpa, dmac, 6);
+
+  memcpy(arp.arp_spa, saddr, 4);
+  memcpy(arp.arp_tpa, daddr, 4);
+
+  printf("=== ARP ===[\n");
+
+  EtherSend(soc, e_smac, e_dmac, ETHERTYPE_ARP, (u_int8_t *)&arp, sizeof(struct ether_arp));
+
+  print_ether_arp(&arp);
+  printf("]\n");
+
+  return(0);
+}
+
+/*
+ *  ## Gratuitous ARPを送信する
+ */
+int ArpSendRequestGratuitous(int soc, struct in_addr *targetIp) {
+  union {
+    u_int32_t  l;
+    u_int8_t  c[4];
+  } saddr, daddr;
+
+  saddr.l = 0;
+  daddr.l = targetIp->s_addr;
+  ArpSend(soc, ARPOP_REQUEST, Param.vmac, BcastMac, Param.vmac, AllZeroMac, saddr.c, daddr.c);
+
+  return(0);
+}
+
+/*
+ *  ## ARP要求を送信する
+ */
+int ArpSendRequest(int soc, struct in_addr *targetIp) {
+  union {
+    u_int32_t  l;
+    u_int8_t  c[4];
+  } saddr, daddr;
+
+  saddr.l = Param.vip.s_addr;
+  daddr.l = targetIp->s_addr;
+  ArpSend(soc, ARPOP_REQUEST, Param.vmac, BcastMac, Param.vmac, AllZeroMac, saddr.c, daddr.c);
+
+  return(0);
+}
+
+/*
+ *  ## IPアドレスの重複をチェックする
+ */
+int ArpCheckGArp(int soc) {
+  u_int8_t  dmac[6];
+  char  buf1[80], buf2[80];
+
+  if (GetTargetMac(soc, &Param.vip, dmac, 1)) {
+    printf("ArpCheckGArp:%s use %s\n", inet_ntop(AF_INET, &Param.vip, buf1, sizeof(buf1)), my_ether_ntoa_r(dmac, buf2));
+    return(0);
+  }
+
+  return(1);
+}
+
+/*
+ *  ## ARPパケットを受信する
+ */
+int ArpRecv(int soc, struct ether_header *eh, u_int8_t *data, int len) {
+  struct ether_arp  *arp;
+  u_int8_t  *ptr = data;
+
+  /* ARPヘッダ取得 */
+  arp = (struct ether_arp *)ptr;
+  ptr += sizeof(struct ether_arp);
+  len -= sizeof(struct ether_arp);
+
+  if (ntohs(arp->arp_op) == ARPOP_REQUEST) {
+    struct in_addr  addr;
+    addr.s_addr = (arp->arp_tpa[3] << 24) | (arp->arp_tpa[2] << 16) | (arp->arp_tpa[1] << 8) | (arp->arp_tpa[0]);
+    if (isTargetIPAddr(&addr)) {
+      printf("--- recv ---[\n");
+      print_ether_header(eh);
+      print_ether_arp(arp);
+      printf("]\n");
+
+      addr.s_addr = (arp->arp_spa[3] << 24) | (arp->arp_spa[2] << 16) | (arp->arp_spa[1] << 8) | (arp->arp_spa[0]);
+      ArpAddTable(arp->arp_sha, &addr);
+      ArpSend(soc, ARPOP_REPLY,
+          Param.vmac, eh->ether_shost,
+          Param.vmac, arp->arp_sha,
+          arp->arp_tpa, arp->arp_spa);
+    }
+  }
+
+  if (ntohs(arp->arp_op) == ARPOP_REPLY) {
+    struct in_addr  addr;
+    addr.s_addr = (arp->arp_tpa[3] << 24) | (arp->arp_tpa[2] << 16) | (arp->arp_tpa[1] << 8) | (arp->arp_tpa[0]);
+    if (addr.s_addr == 0 || isTargetIPAddr(&addr)) {
+      printf("--- recv ---[\n");
+      print_ether_header(eh);
+      print_ether_arp(arp);
+      printf("]\n");
+      addr.s_addr = (arp->arp_spa[3] << 24) | (arp->arp_spa[2] << 18) | (arp->arp_spa[1] << 8) | (arp->arp_spa[0]);
+      ArpAddTable(arp->arp_sha, &addr);
+    }
+  }
+
+  return(0);
+}
+
