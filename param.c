@@ -58,7 +58,7 @@ int ReadParam(char *fname) {
     ptr = strtok_r(buf, "=", &saveptr);
     if (ptr != NULL) {
       if (strcmp(ptr, "IP-TTL") == 0) {
-        if ( (prt = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
+        if ( (ptr = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
           Param.IpTTL = atoi(ptr);
         }
       } else if (strcmp(ptr, "MTU") == 0) {

@@ -10,7 +10,7 @@
 #include <linux/if.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
-#include <ptherad.h>
+#include <pthread.h>
 #include "sock.h"
 #include "ether.h"
 #include "arp.h"

@@ -54,13 +54,13 @@ void print_ip(struct ip *ip) {
     "undefined",
     "UDP"
   };
-  har  buf1[80];
+  char  buf1[80];
 
   printf("ip---------------------------------------------------\n");
 
   printf("ip_v=%u,", ip->ip_v);
   printf("ip_hl=%u,", ip->ip_hl);
-  printf("ip_tos=%,", ip->ip_tos);
+  printf("ip_tos=%x,", ip->ip_tos);
   printf("ip_len=%u,", ntohs(ip->ip_len));
   printf("ip_id=%u,", ntohs(ip->ip_id));
   printf("ip_off=%x, %d\n", (ntohs(ip->ip_off)) >> 13 & 0x07, ntohs(ip->ip_off) & IP_OFFMASK);
@@ -128,9 +128,9 @@ int IpRecvBufAdd(u_int16_t id) {
 int IpRecvBufDel(u_int16_t id) {
   int  i;
 
-  for (i = 0; i < IP_RECV_BUF_NO; i+) {
+  for (i = 0; i < IP_RECV_BUF_NO; i++) {
     if (IpRecvBuf[i].id == id) {
-      IpRecvBuf[i].id == -1;
+      IpRecvBuf[i].id = -1;
       return(1);
     }
   }
@@ -211,9 +211,9 @@ int IpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, u_int8_
 /*
  *  ## IPパケットをイーサネットに送信する
  */
-int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto, int dontFlangment, int ttl, u_int8_t *data, int len) {
+int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto, int dontFlagment, int ttl, u_int8_t *data, int len) {
   struct ip  *ip;
-  u_int8_t  *dptr, *ptr, subf[ETHERMTU];
+  u_int8_t  *dptr, *ptr, sbuf[ETHERMTU];
   u_int16_t  id;
   int  lest, sndLen, off, flagment;
 
@@ -245,7 +245,7 @@ int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *sadd
     ip->ip_id = htons(id);
     off = (dptr - data) / 8;
     if (dontFlagment) {
-      ip-ip_off = htons(IP_DF);
+      ip->ip_off = htons(IP_DF);
     } else if (flagment) {
       ip->ip_off = htons((IP_MF) | (off & IP_OFFMASK));
     } else {
@@ -254,7 +254,7 @@ int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *sadd
     ip->ip_ttl = ttl;
     ip->ip_p = proto;
     ip->ip_src.s_addr = saddr->s_addr;
-    ip->ip_dst.saddr = daddr->s_addr;
+    ip->ip_dst.s_addr = daddr->s_addr;
     ip->ip_sum = 0;
     ip->ip_sum = checksum((u_int8_t *)ip, sizeof(struct ip));
     ptr += sizeof(struct ip);
@@ -281,7 +281,7 @@ int IpSend(int soc, struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto
   int  ret;
 
   if (GetTargetMac(soc, daddr, dmac, 0)) {
-    ret = IpSendLink(soc, Param.vmac, dmac, saddr, daddr, proto, dontFlangment, ttl, data, len);
+    ret = IpSendLink(soc, Param.vmac, dmac, saddr, daddr, proto, dontFlagment, ttl, data, len);
   } else {
     printf("IpSend:%s Destination Host Unreachable\n", inet_ntop(AF_INET, daddr, buf1, sizeof(buf1)));
     ret = -1;

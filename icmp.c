@@ -108,6 +108,7 @@ int IcmpSendEchoReply(int soc, struct ip *r_ip, struct icmp *r_icmp, u_int8_t *d
  */
 int IcmpSendEcho(int soc, struct in_addr *daddr, int seqNo, int size) {
   int  i, psize;
+  u_int8_t  *ptr;
   u_int8_t  sbuf[64 * 1024];
   struct icmp  *icmp;
 
@@ -130,7 +131,7 @@ int IcmpSendEcho(int soc, struct in_addr *daddr, int seqNo, int size) {
   icmp->icmp_cksum = checksum((u_int8_t *)sbuf, ptr - sbuf);
 
   printf("=== ICMP echo ===[\n");
-  IpSend(soc, &Param.vip, daddr, IPPROTO_ICMP, 0, Param.IpTTL, sbuf, ptr - sbf);
+  IpSend(soc, &Param.vip, daddr, IPPROTO_ICMP, 0, Param.IpTTL, sbuf, ptr - sbuf);
   print_icmp(icmp);
   printf("]\n");
 

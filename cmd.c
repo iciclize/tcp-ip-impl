@@ -41,7 +41,7 @@ int DoCmdArp(char **cmdline) {
       printf("DoCmdArp:-d no arg\n");
       return(-1);
     }
-    struct in/addr  addr;
+    struct in_addr  addr;
     inet_aton(ptr, &addr);
     if (ArpDelTable(&addr)) {
       printf("deleted\n");
@@ -90,6 +90,7 @@ int DoCmdIfconfig(char **cmdline) {
 }
 
 int DoCmdNetstat(char **cmdline) {
+  return(1);
 }
 
 int DoCmdEnd(char **cmdline) {
@@ -98,7 +99,7 @@ int DoCmdEnd(char **cmdline) {
   return(0);
 }
 int DoCmd(char *cmd) {
-  char  *ptr, saveptr;
+  char  *ptr, *saveptr;
 
   if ((ptr = strtok_r(cmd, " \r\n", &saveptr)) == NULL) {
     printf("DoCmd:no cmd\n");

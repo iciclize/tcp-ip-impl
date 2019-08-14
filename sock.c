@@ -7,7 +7,7 @@
 #include <time.h>
 #include <sys/ioctl.h>
 #include <netpacket/packet.h>
-#include <netinet/ip_h.>
+#include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/if_ether.h>
 #include <linux/if.h>

@@ -216,10 +216,10 @@ int ArpSearchTable(struct in_addr *ipaddr, u_int8_t mac[6]) {
 
   pthread_rwlock_rdlock(&ArpTableLock);
 
-  for (i = 0; i < ARP_TABLE_NO, i++) {
+  for (i = 0; i < ARP_TABLE_NO; i++) {
     if (memcmp(ArpTable[i].mac, AllZeroMac, 6) == 0) {
     } else {
-      if (memcmp(ArpTable[i].ipaddr.s_addr == ipaddr->s_addr)) {
+      if (ArpTable[i].ipaddr.s_addr == ipaddr->s_addr) {
         memcpy(mac, ArpTable[i].mac, 6);
         pthread_rwlock_unlock(&ArpTableLock);
         return(1);
@@ -261,7 +261,7 @@ int GetTargetMac(int soc, struct in_addr *daddr, u_int8_t dmac[6], int gratuitou
   struct in_addr  addr;
 
   if (isSameSubnet(daddr)) {
-    add.s_addr = daddr->s_addr;
+    addr.s_addr = daddr->s_addr;
   } else {
     addr.s_addr = Param.gateway.s_addr;
   }

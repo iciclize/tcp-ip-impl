@@ -39,7 +39,7 @@ int my_ether_aton(char *str, u_int8_t *mac) {
   int  c;
   char  *tmp = strdup(str);
 
-  for (c = 0; ptr = strtok_r(tmp, ":", &saveptr); c < 6; c++, ptr = strtok_r(NULL, ":", &saveptr)) {
+  for (c = 0, ptr = strtok_r(tmp, ":", &saveptr); c < 6; c++, ptr = strtok_r(NULL, ":", &saveptr)) {
     if (ptr == NULL) {
       free(tmp);
       return(-1);
