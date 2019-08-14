@@ -65,8 +65,7 @@ int DoCmdPing(char **cmdline) {
     return(-1);
   }
   inet_aton(ptr, &daddr);
-  // これマジ？
-  if ((ptr = strtok_r(NULL, "\r\n", cmdline)) == NULL) {
+  if ((ptr = strtok_r(NULL, " \r\n", cmdline)) == NULL) {
     size = DEFAULT_PING_SIZE;
   } else {
     size = atoi(ptr);
@@ -117,7 +116,7 @@ int DoCmd(char *cmd) {
     DoCmdArp(&saveptr);
     return(0);
   } else if (strcmp(ptr, "ping") == 0) {
-    DoCmdIfconfig(&saveptr);
+    DoCmdPing(&saveptr);
     return(0);
   } else if (strcmp(ptr, "ifconfig") == 0) {
     DoCmdIfconfig(&saveptr);
