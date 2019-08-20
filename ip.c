@@ -95,13 +95,15 @@ int IpRecvBufAdd(u_int16_t id) {
   time_t  oldestTime;
 
   freeNo = -1;
-  oldestTime = ULONG_MAX;
+  oldestTime = ULONG_MAX; /* unsigned longの最大値. timeのデフォルト値 */
   oldestNo = -1;
   for (i = 0; i < IP_RECV_BUF_NO; i++) {
     if (IpRecvBuf[i].id == -1) {
+      // 空きのエントリを発見
       freeNo = i;
     } else {
       if (IpRecvBuf[i].id == id) {
+        // 既にエントリがある
         return(i);
       }
       if (IpRecvBuf[i].timestamp < oldestTime) {

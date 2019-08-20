@@ -74,19 +74,19 @@ int ReadParam(char *fname) {
           Param.gateway.s_addr = inet_addr(ptr);
         }
       } else if (strcmp(ptr, "device") == 0) {
-        if ( (ptr = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
+        if ( (ptr = strtok_r(NULL, " \r\n", &saveptr)) != NULL ) {
           Param.device = strdup(ptr);
         }
       } else if (strcmp(ptr, "vmac") == 0) {
-        if ( (ptr = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
+        if ( (ptr = strtok_r(NULL, " \r\n", &saveptr)) != NULL ) {
           my_ether_aton(ptr, Param.vmac);
         }
       } else if (strcmp(ptr, "vip") == 0) {
-        if ( (ptr = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
+        if ( (ptr = strtok_r(NULL, " \r\n", &saveptr)) != NULL ) {
           Param.vip.s_addr = inet_addr(ptr);
         }
       } else if (strcmp(ptr, "vmask") == 0) {
-        if ( (ptr = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
+        if ( (ptr = strtok_r(NULL, " \r\n", &saveptr)) != NULL ) {
           Param.vmask.s_addr = inet_addr(ptr);
         }
       }

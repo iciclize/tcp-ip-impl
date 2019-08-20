@@ -148,8 +148,7 @@ int show_ifreq(char *name) {
   struct sockaddr_in  addr;
 
   if ( (soc = socket(AF_INET, SOCK_DGRAM, 0)) == -1 ) {
-    perror("ioctl:flags");
-    close(soc);
+    perror("socket");
     return(-1);
   }
 
@@ -250,7 +249,7 @@ int main(int argc, char *argv[]) {
   pthread_attr_init(&attr);
   pthread_attr_setstacksize(&attr, 102400);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  if (pthread_create(&thread_id, &attr, StdInThread, NULL) != 0) {
+  if (pthread_create(&thread_id, &attr, MyEthThread, NULL) != 0) {
     printf("pthread_create:error\n");
   }
   if (pthread_create(&thread_id, &attr, StdInThread, NULL) != 0) {
