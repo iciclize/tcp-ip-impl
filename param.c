@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/wait.h>
+#include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include "sock.h"
@@ -31,14 +32,16 @@ static char  *ParamFname = NULL;
 /*
  *  ## パラメータのデフォルト値をセットしてファイルから読み込む
  */
-int SetDefaultParam() {
+int SetDefaultParam()
+{
   Param.MTU = DEFAULT_MTU;
   Param.IpTTL = DEFAULT_IP_TTL;
 
   return(0);
 }
 
-int ReadParam(char *fname) {
+int ReadParam(char *fname)
+{
   FILE  *fp;
   char  buf[1024];
   char  *ptr, *saveptr;
@@ -101,14 +104,16 @@ int ReadParam(char *fname) {
 /*
  *  ## IPアドレスとサブネットのチェック
  */
-int isTargetIPAddr(struct in_addr *addr) {
+int isTargetIPAddr(struct in_addr *addr)
+{
   if (Param.vip.s_addr == addr->s_addr) {
     return(1);
   }
   return(0);
 }
 
-int isSameSubnet(struct in_addr *addr) {
+int isSameSubnet(struct in_addr *addr)
+{
   if ((addr->s_addr & Param.vmask.s_addr) == (Param.vip.s_addr & Param.vmask.s_addr)) {
     return(1);
   } else {

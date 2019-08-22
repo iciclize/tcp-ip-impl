@@ -48,7 +48,7 @@ void *MyEthThread(void *arg)
   int  len;
 
   targets[0].fd = DeviceSoc;
-  targets[0].events = POLL_IN | POLLERR;
+  targets[0].events = POLLIN | POLLERR;
 
   while (EndFlag == 0) {
     switch ( (nready = poll(targets, 1, 1000)) ) {
@@ -79,7 +79,8 @@ void *MyEthThread(void *arg)
 /*
  *  ## コマンドの入力処理を行う
  */
-void *StdInThread(void *arg) {
+void *StdInThread(void *arg)
+{
   int  nready;
   struct pollfd  targets[1];
   char  buf[2048];
@@ -111,11 +112,13 @@ void *StdInThread(void *arg) {
 /*
  *  ## 終了処理を行う
  */
-void sig_term(int sig) {
+void sig_term(int sig)
+{
   EndFlag = 1;
 }
 
-int ending() {
+int ending()
+{
   struct ifreq  if_req;
 
   printf("ending\n");
@@ -141,7 +144,8 @@ int ending() {
 /*
  *   ## インターフェースの情報を出力する
  */
-int show_ifreq(char *name) {
+int show_ifreq(char *name)
+{
   char  buf1[80];
   int  soc;
   struct ifreq  ifreq;
@@ -199,7 +203,8 @@ int show_ifreq(char *name) {
 /*
  *  ## main関数の記述
  */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   char  buf1[80];
   int  i, paramFlag;
   pthread_attr_t  attr;

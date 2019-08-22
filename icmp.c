@@ -27,7 +27,8 @@ PING_DATA  PingData[PING_SEND_NO];
 /*
  *  ## ICMPヘッダを表示する
  */
-int print_icmp(struct icmp *icmp) {
+int print_icmp(struct icmp *icmp)
+{
   static char  *icmp_type[] = {
     "Echo Reply",
     "undefined",
@@ -41,7 +42,7 @@ int print_icmp(struct icmp *icmp) {
     "Router Advertisement",
     "Router Selection",
     "Time Exceeded for Datagram",
-    "parameter Problem on Datagram",
+    "Parameter Problem on Datagram",
     "Timestamp Request",
     "Timestamp Reply",
     "Information Request",
@@ -74,7 +75,8 @@ int print_icmp(struct icmp *icmp) {
 /*
  *  ## ICMPエコー応答を送信する
  */
-int IcmpSendEchoReply(int soc, struct ip *r_ip, struct icmp *r_icmp, u_int8_t *data, int len, int ip_ttl) {
+int IcmpSendEchoReply(int soc, struct ip *r_ip, struct icmp *r_icmp, u_int8_t *data, int len, int ip_ttl)
+{
   u_int8_t  *ptr;
   u_int8_t  sbuf[64 * 1024];
   struct icmp  *icmp;
@@ -106,7 +108,8 @@ int IcmpSendEchoReply(int soc, struct ip *r_ip, struct icmp *r_icmp, u_int8_t *d
 /*
  *  ## ICMPエコー要求を送信する
  */
-int IcmpSendEcho(int soc, struct in_addr *daddr, int seqNo, int size) {
+int IcmpSendEcho(int soc, struct in_addr *daddr, int seqNo, int size)
+{
   int  i, psize;
   u_int8_t  *ptr;
   u_int8_t  sbuf[64 * 1024];
@@ -140,7 +143,8 @@ int IcmpSendEcho(int soc, struct in_addr *daddr, int seqNo, int size) {
   return(0);
 }
 
-int PingSend(int soc, struct in_addr *daddr, int size) {
+int PingSend(int soc, struct in_addr *daddr, int size)
+{
   int  i;
 
   for (i = 0; i < PING_SEND_NO; i++) {
@@ -154,7 +158,8 @@ int PingSend(int soc, struct in_addr *daddr, int size) {
 /*
  *  ## 受信したICMPパケットを処理する
  */
-int IcmpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, struct ip *ip, u_int8_t *data, int len) {
+int IcmpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, struct ip *ip, u_int8_t *data, int len)
+{
   struct icmp  *icmp;
   u_int16_t  sum;
   int  icmpSize;
@@ -190,7 +195,8 @@ int IcmpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, struc
 /*
  *  ## ICMPエコー応答をチェックする
  */
-int PingCheckReply(struct ip *ip, struct icmp *icmp) {
+int PingCheckReply(struct ip *ip, struct icmp *icmp)
+{
   char  buf1[80];
 
   if (ntohs(icmp->icmp_id) == getpid()) {

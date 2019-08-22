@@ -37,7 +37,8 @@ extern u_int8_t  BcastMac[6];
 /*
  *  ## ARPヘッダのIPアドレスを文字列に変換する
  */
-char *my_arp_ip_ntoa_r(u_int8_t ip[4], char *buf) {
+char *my_arp_ip_ntoa_r(u_int8_t ip[4], char *buf)
+{
   sprintf(buf, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 
   return(buf);
@@ -46,7 +47,8 @@ char *my_arp_ip_ntoa_r(u_int8_t ip[4], char *buf) {
 /*
  *  ## ARPヘッダを表示する
  */
-void print_ether_arp(struct ether_arp *ether_arp) {
+void print_ether_arp(struct ether_arp *ether_arp)
+{
   static char *hrd[] = {
     "From KA9Q: NET/ROM pseudo.",
     "Ethernet 10/100Mbps.",
@@ -56,7 +58,7 @@ void print_ether_arp(struct ether_arp *ether_arp) {
     "Chaosnet.",
     "IEEE 802.2 Ethernet/TR/TB.",
     "ARCnet.",
-    "ARPLEtalk.",
+    "APPLEtalk.",
     "undefine",
     "undefine",
     "undefine",
@@ -76,7 +78,7 @@ void print_ether_arp(struct ether_arp *ether_arp) {
 
   static char *op[] = {
     "undefined",
-    "ARP Request.",
+    "ARP request.",
     "ARP reply.",
     "RARP request.",
     "RARP reply.",
@@ -118,7 +120,7 @@ void print_ether_arp(struct ether_arp *ether_arp) {
   }
   printf("arp_hln=%u,", ether_arp->arp_hln);
   printf("arp_pln=%u,", ether_arp->arp_pln);
-  printf("arp_op=%u,", ntohs(ether_arp->arp_op));
+  printf("arp_op=%u", ntohs(ether_arp->arp_op));
   if (ntohs(ether_arp->arp_op) <= 10) {
     printf("(%s)\n", op[ntohs(ether_arp->arp_op)]);
   } else {
@@ -137,7 +139,8 @@ void print_ether_arp(struct ether_arp *ether_arp) {
  */
 /* MACアドレスを保持するmacメンバが全て0の場合に未使用.
  * 未使用があればそこに格納し、なければ格納したのが最も古いデータを上書き.  */
-int ArpAddTable(u_int8_t mac[6], struct in_addr *ipaddr) {
+int ArpAddTable(u_int8_t mac[6], struct in_addr *ipaddr)
+{
   int  i, freeNo, oldestNo, intoNo;
   time_t  oldestTime;
 
@@ -186,7 +189,8 @@ int ArpAddTable(u_int8_t mac[6], struct in_addr *ipaddr) {
  *  ## ARPテーブルを削除する
  */
 /* 0埋めで削除 */
-int ArpDelTable(struct in_addr *ipaddr) {
+int ArpDelTable(struct in_addr *ipaddr)
+{
   int  i;
 
   pthread_rwlock_wrlock(&ArpTableLock);
@@ -211,7 +215,8 @@ int ArpDelTable(struct in_addr *ipaddr) {
 /*
  *  ## ARPテーブルを検索する
  */
-int ArpSearchTable(struct in_addr *ipaddr, u_int8_t mac[6]) {
+int ArpSearchTable(struct in_addr *ipaddr, u_int8_t mac[6])
+{
   int  i;
 
   pthread_rwlock_rdlock(&ArpTableLock);
@@ -235,7 +240,8 @@ int ArpSearchTable(struct in_addr *ipaddr, u_int8_t mac[6]) {
 /*
  *  ## ARPテーブルを表示する
  */
-int ArpShowTable() {
+int ArpShowTable()
+{
   char  buf1[80], buf2[80];
   int  i;
 
@@ -256,7 +262,8 @@ int ArpShowTable() {
 /*
  *  ## 宛先MACアドレスを調べる
  */
-int GetTargetMac(int soc, struct in_addr *daddr, u_int8_t dmac[6], int gratuitous) {
+int GetTargetMac(int soc, struct in_addr *daddr, u_int8_t dmac[6], int gratuitous)
+{
   int  count;
   struct in_addr  addr;
 
@@ -289,7 +296,8 @@ int GetTargetMac(int soc, struct in_addr *daddr, u_int8_t dmac[6], int gratuitou
 int ArpSend(int soc, u_int16_t op,
     u_int8_t e_smac[6], u_int8_t e_dmac[6],
     u_int8_t smac[6], u_int8_t dmac[6],
-    u_int8_t saddr[4], u_int8_t daddr[4]) {
+    u_int8_t saddr[4], u_int8_t daddr[4])
+{
   struct ether_arp  arp;
 
   memset(&arp, 0, sizeof(struct ether_arp));
@@ -300,7 +308,7 @@ int ArpSend(int soc, u_int16_t op,
   arp.arp_op = htons(op);
 
   memcpy(arp.arp_sha, smac, 6);
-  memcpy(arp.arp_tpa, dmac, 6);
+  memcpy(arp.arp_tha, dmac, 6);
 
   memcpy(arp.arp_spa, saddr, 4);
   memcpy(arp.arp_tpa, daddr, 4);
@@ -318,7 +326,8 @@ int ArpSend(int soc, u_int16_t op,
 /*
  *  ## Gratuitous ARPを送信する
  */
-int ArpSendRequestGratuitous(int soc, struct in_addr *targetIp) {
+int ArpSendRequestGratuitous(int soc, struct in_addr *targetIp)
+{
   union {
     u_int32_t  l;
     u_int8_t  c[4];
@@ -334,7 +343,8 @@ int ArpSendRequestGratuitous(int soc, struct in_addr *targetIp) {
 /*
  *  ## ARP要求を送信する
  */
-int ArpSendRequest(int soc, struct in_addr *targetIp) {
+int ArpSendRequest(int soc, struct in_addr *targetIp)
+{
   union {
     u_int32_t  l;
     u_int8_t  c[4];
@@ -350,7 +360,8 @@ int ArpSendRequest(int soc, struct in_addr *targetIp) {
 /*
  *  ## IPアドレスの重複をチェックする
  */
-int ArpCheckGArp(int soc) {
+int ArpCheckGArp(int soc)
+{
   u_int8_t  dmac[6];
   char  buf1[80], buf2[80];
 
@@ -365,7 +376,8 @@ int ArpCheckGArp(int soc) {
 /*
  *  ## ARPパケットを受信する
  */
-int ArpRecv(int soc, struct ether_header *eh, u_int8_t *data, int len) {
+int ArpRecv(int soc, struct ether_header *eh, u_int8_t *data, int len)
+{
   struct ether_arp  *arp;
   u_int8_t  *ptr = data;
 
@@ -400,7 +412,7 @@ int ArpRecv(int soc, struct ether_header *eh, u_int8_t *data, int len) {
       print_ether_header(eh);
       print_ether_arp(arp);
       printf("]\n");
-      addr.s_addr = (arp->arp_spa[3] << 24) | (arp->arp_spa[2] << 18) | (arp->arp_spa[1] << 8) | (arp->arp_spa[0]);
+      addr.s_addr = (arp->arp_spa[3] << 24) | (arp->arp_spa[2] << 16) | (arp->arp_spa[1] << 8) | (arp->arp_spa[0]);
       ArpAddTable(arp->arp_sha, &addr);
     }
   }

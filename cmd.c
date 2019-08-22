@@ -25,7 +25,8 @@ extern PARAM  Param;
 /*
  *  ## コマンドごとに処理を行う
  */
-int DoCmdArp(char **cmdline) {
+int DoCmdArp(char **cmdline)
+{
   char  *ptr;
 
   if ((ptr = strtok_r(NULL, " \r\n", cmdline)) == NULL) {
@@ -55,7 +56,8 @@ int DoCmdArp(char **cmdline) {
   }
 }
 
-int DoCmdPing(char **cmdline) {
+int DoCmdPing(char **cmdline)
+{
   char  *ptr;
   struct in_addr  daddr;
   int  size;
@@ -75,7 +77,8 @@ int DoCmdPing(char **cmdline) {
   return(0);
 }
 
-int DoCmdIfconfig(char **cmdline) {
+int DoCmdIfconfig(char **cmdline)
+{
   char  buf1[80];
 
   printf("device=%s\n", Param.device);
@@ -88,17 +91,20 @@ int DoCmdIfconfig(char **cmdline) {
   return(0);
 }
 
-int DoCmdNetstat(char **cmdline) {
+int DoCmdNetstat(char **cmdline)
+{
   return(1);
 }
 
-int DoCmdEnd(char **cmdline) {
+int DoCmdEnd(char **cmdline)
+{
   kill(getpid(), SIGTERM);
 
   return(0);
 }
 
-int DoCmd(char *cmd) {
+int DoCmd(char *cmd)
+{
   char  *ptr, *saveptr;
 
   if ((ptr = strtok_r(cmd, " \r\n", &saveptr)) == NULL) {

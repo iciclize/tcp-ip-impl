@@ -33,7 +33,8 @@ IP_RECV_BUF  IpRecvBuf[IP_RECV_BUF_NO];
 /*
  *  ## IPヘッダを表示する
  */
-void print_ip(struct ip *ip) {
+void print_ip(struct ip *ip)
+{
   static char  *proto[] = {
     "undefined",
     "ICMP",
@@ -61,11 +62,11 @@ void print_ip(struct ip *ip) {
   printf("ip_v=%u,", ip->ip_v);
   printf("ip_hl=%u,", ip->ip_hl);
   printf("ip_tos=%x,", ip->ip_tos);
-  printf("ip_len=%u,", ntohs(ip->ip_len));
+  printf("ip_len=%d\n", ntohs(ip->ip_len));
   printf("ip_id=%u,", ntohs(ip->ip_id));
   printf("ip_off=%x, %d\n", (ntohs(ip->ip_off)) >> 13 & 0x07, ntohs(ip->ip_off) & IP_OFFMASK);
   printf("ip_ttl=%u,", ip->ip_ttl);
-  printf("ip_p=%u,", ip->ip_p);
+  printf("ip_p=%u", ip->ip_p);
   if (ip->ip_p <= 17) {
     printf("(%s),", proto[ip->ip_p]);
   } else {
@@ -81,7 +82,8 @@ void print_ip(struct ip *ip) {
 /*
  *  ## IP受信バッファを初期化してデータを追加する
  */
-int IpRecvBufInit() {
+int IpRecvBufInit()
+{
   int  i;
   for (i = 0; i < IP_RECV_BUF_NO; i++) {
     IpRecvBuf[i].id = -1;
@@ -90,7 +92,8 @@ int IpRecvBufInit() {
   return(0);
 }
 
-int IpRecvBufAdd(u_int16_t id) {
+int IpRecvBufAdd(u_int16_t id)
+{
   int  i, freeNo, oldestNo, intoNo;
   time_t  oldestTime;
 
@@ -127,7 +130,8 @@ int IpRecvBufAdd(u_int16_t id) {
 /*
  *  ## IP受信バッファを削除する
  */
-int IpRecvBufDel(u_int16_t id) {
+int IpRecvBufDel(u_int16_t id)
+{
   int  i;
 
   for (i = 0; i < IP_RECV_BUF_NO; i++) {
@@ -143,7 +147,8 @@ int IpRecvBufDel(u_int16_t id) {
 /*
  *  ## IP受信バッファを検索する
  */
-int IpRecvBufSearch(u_int16_t id) {
+int IpRecvBufSearch(u_int16_t id)
+{
   int  i;
 
   for (i = 0; i < IP_RECV_BUF_NO; i++) {
@@ -158,7 +163,8 @@ int IpRecvBufSearch(u_int16_t id) {
 /*
  *  ## IPパケットを受信する
  */
-int IpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, u_int8_t *data, int len) {
+int IpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, u_int8_t *data, int len)
+{
   struct ip  *ip;
   u_int8_t  option[1500];
   u_int16_t  sum;
@@ -213,7 +219,8 @@ int IpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, u_int8_
 /*
  *  ## IPパケットをイーサネットに送信する
  */
-int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto, int dontFlagment, int ttl, u_int8_t *data, int len) {
+int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto, int dontFlagment, int ttl, u_int8_t *data, int len)
+{
   struct ip  *ip;
   u_int8_t  *dptr, *ptr, sbuf[ETHERMTU];
   u_int16_t  id;
@@ -277,7 +284,8 @@ int IpSendLink(int soc, u_int8_t smac[6], u_int8_t dmac[6], struct in_addr *sadd
 /*
  *  ## IPパケットを送信する
  */
-int IpSend(int soc, struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto, int dontFlagment, int ttl, u_int8_t *data, int len) {
+int IpSend(int soc, struct in_addr *saddr, struct in_addr *daddr, u_int8_t proto, int dontFlagment, int ttl, u_int8_t *data, int len)
+{
   u_int8_t  dmac[6];
   char  buf1[80];
   int  ret;

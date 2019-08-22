@@ -27,14 +27,16 @@ u_int8_t  BcastMac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 /*
  *  ## 文字列とバイナリの変換
  */
-char *my_ether_ntoa_r(u_int8_t *hwaddr, char *buf) {
+char *my_ether_ntoa_r(u_int8_t *hwaddr, char *buf)
+{
   sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
       hwaddr[0], hwaddr[1], hwaddr[2], hwaddr[3], hwaddr[4], hwaddr[5]);
 
   return(buf);
 }
 
-int my_ether_aton(char *str, u_int8_t *mac) {
+int my_ether_aton(char *str, u_int8_t *mac)
+{
   char  *ptr, *saveptr = NULL;
   int  c;
   char  *tmp = strdup(str);
@@ -54,7 +56,8 @@ int my_ether_aton(char *str, u_int8_t *mac) {
 /*
  *  ## 16進ダンプを行う
  */
-int print_hex(u_int8_t *data, int size) {
+int print_hex(u_int8_t *data, int size)
+{
   int  i, j;
 
   for (i = 0; i < size; ) {
@@ -90,7 +93,8 @@ int print_hex(u_int8_t *data, int size) {
 /*
  *  ## イーサネットフレームを表示する
  */
-void print_ether_header(struct ether_header *eh) {
+void print_ether_header(struct ether_header *eh)
+{
   char  buf1[80];
 
   printf("---ether_header---\n");
@@ -124,7 +128,8 @@ void print_ether_header(struct ether_header *eh) {
 /*
  *  ## イーサネットの送受信と内容のチェック
  */
-int EtherSend(int soc, u_int8_t smac[6], u_int8_t dmac[6], u_int16_t type, u_int8_t *data, int len) {
+int EtherSend(int soc, u_int8_t smac[6], u_int8_t dmac[6], u_int16_t type, u_int8_t *data, int len)
+{
   struct ether_header  *eh;
   u_int8_t  *ptr, sbuf[sizeof(struct ether_header) + ETHERMTU];
   int  padlen;
@@ -157,7 +162,8 @@ int EtherSend(int soc, u_int8_t smac[6], u_int8_t dmac[6], u_int16_t type, u_int
   return(0);
 }
 
-int EtherRecv(int soc, u_int8_t *in_ptr, int in_len) {
+int EtherRecv(int soc, u_int8_t *in_ptr, int in_len)
+{
   struct ether_header  *eh;
   u_int8_t  *ptr = in_ptr;
   int  len = in_len;

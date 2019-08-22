@@ -18,7 +18,8 @@
 /*
  *  ## チェックサムを計算する
  */
-u_int16_t checksum(u_int8_t *data, int len) {
+u_int16_t checksum(u_int8_t *data, int len)
+{
   u_int32_t  sum;
   u_int16_t  *ptr;
   int  c;
@@ -47,7 +48,8 @@ u_int16_t checksum(u_int8_t *data, int len) {
   return(~sum);
 }
 
-u_int16_t checksum2(u_int8_t *data1, int len1, u_int8_t *data2, int len2) {
+u_int16_t checksum2(u_int8_t *data1, int len1, u_int8_t *data2, int len2)
+{
   u_int32_t  sum;
   u_int16_t  *ptr;
   int  c;
@@ -63,7 +65,7 @@ u_int16_t checksum2(u_int8_t *data1, int len1, u_int8_t *data2, int len2) {
   }
   if (c == 1) {
     u_int16_t  val;
-    val = (*ptr << 8) + (*data2);
+    val = ((*ptr) << 8) + (*data2);
     sum += val;
     if (sum & 0x80000000) {
       sum = (sum & 0xFFFF) + (sum >> 16);
@@ -97,7 +99,8 @@ u_int16_t checksum2(u_int8_t *data1, int len1, u_int8_t *data2, int len2) {
 /*
  *  ## MACアドレスを調べる
  */
-int GetMacAddress(char *device, u_int8_t *hwaddr) {
+int GetMacAddress(char *device, u_int8_t *hwaddr)
+{
   struct ifreq  ifreq;
   int  soc;
   u_int8_t  *p;
@@ -123,7 +126,8 @@ int GetMacAddress(char *device, u_int8_t *hwaddr) {
 /*
  *  ## 処理を一時待機させる
  */
-int DummyWait(int ms) {
+int DummyWait(int ms)
+{
   struct timespec  ts;
 
   ts.tv_sec = 0;
@@ -137,7 +141,8 @@ int DummyWait(int ms) {
 /*
  *  ## ソケットをPF_PACKETとして初期化して送受信に備える
  */
-int init_socket(char *device) {
+int init_socket(char *device)
+{
   struct ifreq  if_req;
   struct sockaddr_ll  sa;
   int  soc;
