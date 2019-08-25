@@ -262,7 +262,7 @@ int DoCmdTcp(char **cmdline)
     sport = atoi(ptr);
 
     if ( (p_addr = strtok_r(NULL, ":\r\n", cmdline)) == NULL ) {
-      printf("DoCmdTcp:connect:%u no arg\n". sport);
+      printf("DoCmdTcp:connect:%u no arg\n", sport);
       return(-1);
     }
     if ( (p_port = strtok_r(NULL, " \r\n", cmdline)) == NULL ) {
@@ -317,6 +317,11 @@ int DoCmd(char *cmd)
     printf("udp open port : open udp-recv port\n");
     printf("udp close port : close udp-recv port\n");
     printf("udp send sport daddr:dport data : send udp\n");
+    printf("tcp listen port : listen tcp-accept port\n");
+    printf("tcp close port : close tcp port\n");
+    printf("tcp reset port : reset tcp port\n");
+    printf("tcp connect sport daddr:dport : tcp connect\n");
+    printf("tcp send sport data : send tcp\n");
     printf("end : end program\n");
     printf("---------------------------------------\n");
     return(-1);

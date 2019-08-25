@@ -48,19 +48,22 @@ typedef struct {
 
 TCP_TABLE  TcpTable[TCP_TABLE_NO];
 
+/*
+ * from  <netinet/tcp.h>
 enum {
   TCP_ESTABLISHED = 1,
-  TCP_SYN_SENT, /* 接続要求を送った後で一致する接続要求を待つ */
-  TCP_SYN_RECV, /* 接続要求の受信と送信の後で接続要求確認応答の確認を待つ */
-  TCP_FIN_WAIT1,/* 遠隔TCPからの接続終了要求あるいは前に送った接続終了要求の確認応答を待つ */
-  TCP_FIN_WAIT2,/* 遠隔TCPから接続終了要求を待つ */
-  TCP_TIME_WAIT,/* 遠隔TCPがその接続終了要求の確認応答の受け取りを確かに認められるのに十分な時間待つ */
-  TCP_CLOSE,    /* まったくの無接続状態 */
+  TCP_SYN_SENT, // 接続要求を送った後で一致する接続要求を待つ
+  TCP_SYN_RECV, // 接続要求の受信と送信の後で接続要求確認応答の確認を待つ
+  TCP_FIN_WAIT1,// 遠隔TCPからの接続終了要求あるいは前に送った接続終了要求の確認応答を待つ
+  TCP_FIN_WAIT2,// 遠隔TCPから接続終了要求を待つ
+  TCP_TIME_WAIT,// 遠隔TCPがその接続終了要求の確認応答の受け取りを確かに認められるのに十分な時間待つ
+  TCP_CLOSE,    // まったくの無接続状態
   TCP_CLOSE_WAIT,
-  TCP_LAST_ACK, /* (その接続終了要求の確認応答を含む)遠隔TCPに前に送られた接続終了要求の確認応答を待つ */
-  TCP_LISTEN,  /* 任意の遠隔TCPとポートからの接続要求を待つ */
-  TCP_CLOSING  /* now a valid state */
+  TCP_LAST_ACK, // (その接続終了要求の確認応答を含む)遠隔TCPに前に送られた接続終了要求の確認応答を待つ
+  TCP_LISTEN,  // 任意の遠隔TCPとポートからの接続要求を待つ
+  TCP_CLOSING  // now a valid state
 };
+*/
 
 pthread_rwlock_t  TcpTableLock = PTHREAD_RWLOCK_INITIALIZER;
 
@@ -71,20 +74,20 @@ int print_tcp(struct tcphdr *tcp)
 {
   printf("tcp-------------------------------------------\n");
 
-  printf("source=%u," ntohs(tcp->source));
-  printf("dest=%u\n" ntohs(tcp->dest));
-  printf("seq=%u\n" ntohs(tcp->seq));
-  printf("ack_seq=%u\n," ntohs(tcp->ack_seq));
-  printf("doff=%u," ntohs(tcp->doff));
-  printf("urg=%u," tcp->urg);
-  printf("ack=%u," tcp->ack);
-  printf("psh=%u," tcp->psh);
-  printf("rst=%u," tcp->rst);
-  printf("syn=%u," tcp->syn);
-  printf("fin=%u," tcp->fin);
-  printf("window=%u\n," ntohs(tcp->window));
-  printf("check=%04x," ntohs(tcp->check));
-  printf("urg_ptr=%u\n" ntohs(tcp->urg_ptr));
+  printf("source=%u,", ntohs(tcp->source));
+  printf("dest=%u\n", ntohs(tcp->dest));
+  printf("seq=%u\n", ntohs(tcp->seq));
+  printf("ack_seq=%u\n,", ntohs(tcp->ack_seq));
+  printf("doff=%u,", ntohs(tcp->doff));
+  printf("urg=%u,", tcp->urg);
+  printf("ack=%u,", tcp->ack);
+  printf("psh=%u,", tcp->psh);
+  printf("rst=%u,", tcp->rst);
+  printf("syn=%u,", tcp->syn);
+  printf("fin=%u,", tcp->fin);
+  printf("window=%u\n,", ntohs(tcp->window));
+  printf("check=%04x,", ntohs(tcp->check));
+  printf("urg_ptr=%u\n", ntohs(tcp->urg_ptr));
 
   return(0);
 }
@@ -363,7 +366,7 @@ int TcpSendFin(int soc, int no)
   print_tcp(tcp);
   printf("]\n");
 
-  TcpTable[no].snd.nxt = TcpTable[no]snd.una;
+  TcpTable[no].snd.nxt = TcpTable[no].snd.una;
 
   return(0);
 }
@@ -403,7 +406,7 @@ int TcpSendRst(int soc, int no)
   print_tcp(tcp);
   printf("]\n");
 
-  TcpTable[no].snd.nxt = TcpTable[no]snd.una;
+  TcpTable[no].snd.nxt = TcpTable[no].snd.una;
 
   return(0);
 }
@@ -443,7 +446,7 @@ int TcpSendAck(int soc, int no)
   print_tcp(tcp);
   printf("]\n");
 
-  TcpTable[no].snd.nxt = TcpTable[no]snd.una;
+  TcpTable[no].snd.nxt = TcpTable[no].snd.una;
 
   return(0);
 }
@@ -690,7 +693,8 @@ int TcpSend(int soc, u_int16_t sport, u_int8_t *data, int len)
       sndLen = lest;
     }
 
-    printf("TcpSend:offset=%ld,len=%d,lest=%d\n", ptr - data, sndLen, lest);
+    // printf("TcpSend:offset=%ld,len=%d,lest=%d\n", ptr - data, sndLen, lest);
+    printf("TcpSend:offset=%d,len=%d,lest=%d\n", ptr - data, sndLen, lest);
 
     count = 0;
     do {
@@ -707,7 +711,7 @@ int TcpSend(int soc, u_int16_t sport, u_int8_t *data, int len)
     } while (TcpTable[no].snd.una != TcpTable[no].snd.nxt);
 
     ptr += sndLen;
-    lest -= sndLen:
+    lest -= sndLen;
   }
 
   printf("TcpSend:una=%u,nextSeq=%u:success\n",
@@ -824,7 +828,7 @@ int TcpRecv(int soc, struct ether_header *eh, struct ip *ip, u_int8_t *data, int
           printf("TcpRecv:%d:FIN_WAIT2:rst\n", no);
           TcpTable[no].status = TCP_CLOSE;
           TcpTable[no].rcv.nxt = ntohl(tcp->seq);
-          TcpTable[no].rcv.una = ntohl(tcp->ack_seq);
+          TcpTable[no].snd.una = ntohl(tcp->ack_seq);
           TcpSocketClose(TcpTable[no].myPort);
         } else if (tcp->fin == 1) {
           printf("TcpRecv:%d:FIN_WAIT2:fin\n", no);
@@ -885,7 +889,7 @@ int TcpRecv(int soc, struct ether_header *eh, struct ip *ip, u_int8_t *data, int
       TcpTable[no].rcv.wnd = ntohs(tcp->window);
     }
     printf("TcpRecv:%d:%s:S[%u,%u,%u,%u]:R[%u,%u,%u]\n", no,
-        TcpStatusStr(TcpTable[no].statuss),
+        TcpStatusStr(TcpTable[no].status),
         TcpTable[no].snd.una - TcpTable[no].snd.iss,
         TcpTable[no].snd.nxt - TcpTable[no].snd.iss,
         TcpTable[no].snd.wnd,
