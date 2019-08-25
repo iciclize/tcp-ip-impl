@@ -337,6 +337,9 @@ int DoCmd(char *cmd)
   } else if (strcmp(ptr, "udp") == 0) {
     DoCmdUdp(&saveptr);
     return(0);
+  } else if (strcmp(ptr, "tcp") == 0) {
+    DoCmdTcp(&saveptr);
+    return(0);
   } else if (strcmp(ptr, "end") == 0) {
     DoCmdEnd(&saveptr);
     return(0);
