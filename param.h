@@ -2,10 +2,13 @@
 // ETH_DATA_LENは<linux/if_ether.hに#define ETH_DATA_LEN 1500と定義されている
 #define    DEFAULT_MTU    (ETHERMTU)
 #define    DEFAULT_IP_TTL    (64)
+#define    DEFAULT_MSS    (DEFAULT_MTU - sizeof(struct ip) - sizeof(struct tcphdr))
 #define    DEFAULT_PING_SIZE    (64)
 
 #define    DUMMY_WAIT_MS    (100)
 #define    RETRY_COUNT    (3)
+#define    TCP_INIT_WINDOW    (1460)
+#define    TCP_FIN_TIMEOUT    (3)
 
 typedef struct {
   char  *device;
@@ -16,6 +19,7 @@ typedef struct {
   struct in_addr  vmask;
   int  IpTTL;
   int  MTU;
+  int  MSS;
   struct in_addr  gateway;
   u_int32_t  DhcpRequestLeaseTime;
   u_int32_t  DhcpLeaseTime;

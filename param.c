@@ -17,6 +17,7 @@
 #include <net/ethernet.h>
 #include <netinet/if_ether.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netdb.h>
 #include <sys/wait.h>
 #include <netinet/in.h>
@@ -36,6 +37,7 @@ int SetDefaultParam()
 {
   Param.MTU = DEFAULT_MTU;
   Param.IpTTL = DEFAULT_IP_TTL;
+  Param.MSS = DEFAULT_MSS;
 
   return(0);
 }
@@ -70,6 +72,14 @@ int ReadParam(char *fname)
           if (Param.MTU > ETHERMTU) {
             printf("ReadParam:MTU(%d) <= ETHERMTU(%d)\n", Param.MTU, ETHERMTU);
             Param.MTU = ETHERMTU;
+          }
+        }
+      } else if (strcmp(ptr, "MSS") == 0) {
+        if ( (ptr = strtok_r(NULL, "\r\n", &saveptr)) != NULL ) {
+          Param.MSS = atoi(ptr);
+          if (Param.MSS > ETHERMTU) {
+            printf("ReadParam:MSS(%d) <= ETHERMTU(%d)\n", Param.MSS, ETHERMTU);
+            Param.MSS = ETHERMTU;
           }
         }
       } else if (strcmp(ptr, "gateway") == 0) {

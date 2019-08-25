@@ -10,6 +10,7 @@
 #include <netinet/ip_icmp.h>
 #include <netinet/if_ether.h>
 #include <netinet/udp.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include "sock.h"
 #include "ether.h"
@@ -18,6 +19,7 @@
 #include "icmp.h"
 #include "param.h"
 #include "udp.h"
+#include "tcp.h"
 
 extern PARAM  Param;
 
@@ -202,6 +204,8 @@ int IpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, u_int8_
     return(-1);
   }
 
+  ArpAddTable(eh->ether_shost, &ip->ip_src);
+
   plen = ntohs(ip->ip_len) - ip->ip_hl * 4;
 
   no = IpRecvBufAdd(ntohs(ip->ip_id));
@@ -213,6 +217,8 @@ int IpRecv(int soc, u_int8_t *raw, int raw_len, struct ether_header *eh, u_int8_
       IcmpRecv(soc, raw, raw_len, eh, ip, IpRecvBuf[no].data, IpRecvBuf[no].len);
     } else if (ip->ip_p == IPPROTO_UDP) {
       UdpRecv(soc, eh, ip, IpRecvBuf[no].data, IpRecvBuf[no].len);
+    } else if (ip->ip_p == IPPROTO_TCP) {
+      TcpRecv(soc, eh, ip, IpRecvBuf[no].data, IpRecvBuf[no].len);
     }
     IpRecvBufDel(ntohs(ip->ip_id));
   }
