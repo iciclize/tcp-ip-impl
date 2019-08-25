@@ -256,6 +256,8 @@ int UdpSend(int soc, struct in_addr *saddr, struct in_addr *daddr, u_int16_t spo
   print_udp(udp);
   print_hex(data, len);
   printf("]\n");
+
+  return(0);
 }
 
 int UdpRecv(int soc, struct ether_header *eh, struct ip *ip, u_int8_t *data, int len)

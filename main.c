@@ -294,6 +294,9 @@ int main(int argc, char *argv[])
 
   while (EndFlag == 0) {
     sleep(1);
+    if (Param.DhcpStartTime != 0) {
+      DhcpCheck(DeviceSoc);
+    }
   }
 
   ending();

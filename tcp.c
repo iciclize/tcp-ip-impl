@@ -24,7 +24,7 @@ struct pseudo_ip {
   struct in_addr  ip_dst;
   u_int8_t  dummy;
   u_int8_t  ip_p;
-  u_int8_t  ip_len;
+  u_int16_t  ip_len;
 };
 
 #define TCP_TABLE_NO    (16)
@@ -76,16 +76,16 @@ int print_tcp(struct tcphdr *tcp)
 
   printf("source=%u,", ntohs(tcp->source));
   printf("dest=%u\n", ntohs(tcp->dest));
-  printf("seq=%u\n", ntohs(tcp->seq));
-  printf("ack_seq=%u\n,", ntohs(tcp->ack_seq));
-  printf("doff=%u,", ntohs(tcp->doff));
+  printf("seq=%u\n", ntohl(tcp->seq));
+  printf("ack_seq=%u\n,", ntohl(tcp->ack_seq));
+  printf("doff=%u,", tcp->doff);
   printf("urg=%u,", tcp->urg);
   printf("ack=%u,", tcp->ack);
   printf("psh=%u,", tcp->psh);
   printf("rst=%u,", tcp->rst);
   printf("syn=%u,", tcp->syn);
   printf("fin=%u,", tcp->fin);
-  printf("window=%u\n,", ntohs(tcp->window));
+  printf("window=%u\n", ntohs(tcp->window));
   printf("check=%04x,", ntohs(tcp->check));
   printf("urg_ptr=%u\n", ntohs(tcp->urg_ptr));
 
